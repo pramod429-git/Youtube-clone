@@ -19,4 +19,17 @@ const Video = ({ vList }) => {
   );
 };
 
+export const advVideoCard = (Video) => {
+  return (props) => {
+    return (
+      <div>
+        <label className="absolute bg-orange-400 text-white m-2 p-2 hover:shadow-lg hover:bg-red-500 hover:scale-105 transition-transform duration-200 ease-in-out">
+          Promotion
+        </label>
+        <Video {...props} />
+      </div>
+    );
+  };
+};
+
 export default Video;
