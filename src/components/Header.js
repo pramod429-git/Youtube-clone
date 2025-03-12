@@ -10,6 +10,7 @@ const Header = () => {
   const [showSuggestion, setShowSuggestion] = useState([]);
   const [hideSuggestionBar, setHideSuggestionBar] = useState(false);
   console.log(searchBar);
+  console.log(showSuggestion);
   useEffect(() => {
     const timer = setTimeout(() => {
       getSuggestion();
@@ -17,13 +18,43 @@ const Header = () => {
     return () => clearTimeout(timer);
   }, [searchBar]);
   const getSuggestion = async () => {
-    const data = await fetch(
-      "http://suggestqueries.google.com/complete/search?client=firefox&ds=yt&q=" +
-        searchBar
-    );
-    const json = await data.json();
-    //console.log(json[1]);
-    setShowSuggestion(json[1]);
+    //(youtube suggestion url are not working)
+    //   const data = await fetch(
+    //     "https://clients1.google.com/complete/search?client=youtube&gs_ri=youtube&ds=yt&q=" +
+    //       searchBar
+    //   );
+    //   console.log(data);
+    //   const json = await data.json();
+    //   console.log(json[1]);
+    //   setShowSuggestion(json[1]);
+
+    //(updated url )
+    const url = `https://clients1.google.com/complete/search?client=youtube&gs_ri=youtube&ds=yt&q=${searchBar}`;
+    console.log(url);
+
+    try {
+      const response = await fetch(url);
+      console.log(response);
+      const text = await response.text(); // Get response as text
+      console.log(text);
+
+      // Extract JSON-like data from function call
+      // used Regex Extracts content inside square brackets
+      const jsonData = text.match(/\[(.*)\]/s);
+
+      console.log(jsonData);
+
+      if (jsonData) {
+        const parsedData = JSON.parse(`[${jsonData[1]}]`);
+        console.log(parsedData);
+        // Extract first value of each suggestion
+        setShowSuggestion(parsedData[1].map((item) => item[0]));
+      } else {
+        console.error("Failed to extract data.");
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
   };
   console.log(showSuggestion);
   const dispatch = useDispatch();
@@ -72,10 +103,10 @@ const Header = () => {
         </div>
       </div>
       {hideSuggestionBar && (
-        <div className="-mt-8 w-96 py-3 px-2 m-2  outline-none ml-[40rem] bg-white rounded-lg absolute">
+        <div className="-mt-8 w-96 py-3 px-2 m-2  outline-none ml-[40rem] bg-white rounded-lg absolute z-10">
           <ul>
-            {showSuggestion.map((suggest) => (
-              <li key={suggest}>{suggest}</li>
+            {showSuggestion.map((suggest, index) => (
+              <li key={index}>{suggest}</li>
             ))}
           </ul>
         </div>
