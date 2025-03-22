@@ -1,8 +1,9 @@
 import { CiSearch } from "react-icons/ci";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { showSideBar } from "../utils/sideToggleSlice";
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { cacheResult } from "../utils/searchCacheSlice";
 //import { YOUTUBE_SEARCH_SUGGESTION } from "../utils/constant";
 
 const Header = () => {
@@ -11,9 +12,16 @@ const Header = () => {
   const [hideSuggestionBar, setHideSuggestionBar] = useState(false);
   console.log(searchBar);
   console.log(showSuggestion);
+  const dispatch = useDispatch();
+  const cacheResults = useSelector((store) => store.searchCache);
   useEffect(() => {
     const timer = setTimeout(() => {
-      getSuggestion();
+      //getSuggestion();
+      if (cacheResults[searchBar]) {
+        setShowSuggestion();
+      } else {
+        getSuggestion();
+      }
     }, 300);
     return () => clearTimeout(timer);
   }, [searchBar]);
@@ -48,7 +56,9 @@ const Header = () => {
         const parsedData = JSON.parse(`[${jsonData[1]}]`);
         console.log(parsedData);
         // Extract first value of each suggestion
-        setShowSuggestion(parsedData[1].map((item) => item[0]));
+        const loopResult = parsedData[1].map((item) => item[0]);
+        setShowSuggestion(loopResult);
+        dispatch(cacheResult({ [searchBar]: loopResult }));
       } else {
         console.error("Failed to extract data.");
       }
@@ -57,7 +67,7 @@ const Header = () => {
     }
   };
   console.log(showSuggestion);
-  const dispatch = useDispatch();
+
   const toggleClick = () => {
     dispatch(showSideBar());
   };
